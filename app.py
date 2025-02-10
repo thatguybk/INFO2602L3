@@ -67,7 +67,14 @@ def user_login_view():
   return response
 
 # Task 3.2 Here
-
+@app.route('/identify')
+@jwt_required()
+def identify_view():
+  username = get_jwt_identity()
+  user = User.query.filter_by(username=username).first()
+  if user:
+    return jsonify(user.get_json())
+  return jsonify(message='Invalid user'), 403
 # Task 3.3 Here
 
 # Task 3.4 Here
