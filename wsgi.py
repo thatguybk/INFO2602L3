@@ -15,8 +15,7 @@ def initialize():
   bob = RegularUser('bob', 'bob@mail.com', 'bobpass')
   rick = RegularUser('rick', 'rick@mail.com', 'rickpass')
   sally = RegularUser('sally', 'sally@mail.com', 'sallypass')
-  db.session.add_all([bob, rick,
-                      sally])  #add all can save multiple objects at once
+  db.session.add_all([bob, rick, sally])  #add all can save multiple objects at once
   db.session.commit()
   #load todo data from csv file
   with open('todos.csv') as file:
@@ -24,7 +23,7 @@ def initialize():
     for row in reader:
       new_todo = Todo(text=row['text'])  #create object
       #update fields based on records
-      new_todo.done = True if row['done'] == 'true' else False
+      new_todo.done = bool(row['done'])
       new_todo.user_id = int(row['user_id'])
       db.session.add(new_todo)  #queue changes for saving
     db.session.commit()
