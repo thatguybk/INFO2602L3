@@ -58,6 +58,13 @@ def index():
   return '<h1>mY Todo API</h1>'
 
 # Task 3.1 Here
+@app.route('/login', methods=['POST'])
+def user_login_view():
+  data = request.json
+  response = login_user(data['username'], data['password'])
+  if not response:
+    return jsonify(message='bad username or password given'), 403
+  return response
 
 # Task 3.2 Here
 
