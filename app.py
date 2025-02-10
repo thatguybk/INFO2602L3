@@ -58,6 +58,9 @@ def index():
   return '<h1>mY Todo API</h1>'
 
 # Task 3.1 Here
+
+
+# Task 3.2 Here
 @app.route('/login', methods=['POST'])
 def user_login_view():
   data = request.json
@@ -65,8 +68,7 @@ def user_login_view():
   if not response:
     return jsonify(message='bad username or password given'), 403
   return response
-
-# Task 3.2 Here
+# Task 3.3 Here
 @app.route('/identify')
 @jwt_required()
 def identify_view():
@@ -75,10 +77,12 @@ def identify_view():
   if user:
     return jsonify(user.get_json())
   return jsonify(message='Invalid user'), 403
-# Task 3.3 Here
-
 # Task 3.4 Here
-
+@app.route('/logout', methods=['GET'])
+def logout():
+  response = jsonify(message='Logged out')
+  unset_jwt_cookies(response)
+  return response
 # Task 4 Here
 
 # ********** Todo Crud Operations ************
