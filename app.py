@@ -84,17 +84,71 @@ def logout():
   unset_jwt_cookies(response)
   return response
 # Task 4 Here
-
+@app.route('/signup', methods=['POST'])
+def signup_user_view():
+  data = request.json
+  try:
+    new_user = RegularUser(data['username'], data['email'], data['password'])
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify(message=f'User {new_user.id} - {new_user.username} created!'), 201
+  except IntegrityError:
+    db.session.rollback()
+    return jsonify(message='Username already exists'), 400
 # ********** Todo Crud Operations ************
 
 
 # Task 5.1 Here POST /todos
+@app.route('/todos', methods=['POST'])
+@login_required(RegularUser)
+def create_todo_view():
+  data = request.json
+  username = get_jwt_identity()
+  user = RegularUser.query.filter_by(username=username).first()
+  new_todo = user.add_todo(data['text'])
+  return jsonify(message=f'todo {new_todo.id} created!'), 201
+
 
 # Task 5.2 Here GET /todos
+@app.route('/todos', methods=['GET'])
+@jwt_required()
+def get_todos_view():
+  # get the user object of the authenticated user
+  user = RegularUser.query.filter_by(username=get_jwt_identity()).first()
 
+  # converts todo objects to list of todo dictionaries
+  todo_json = [ todo.get_json() for todo in user.todos ]
+  return jsonify(todo_json), 200
+  
 # Task 5.3 Here GET /todos/id
+@app.route('/todos/<int:id>', methods=['GET'])
+@jwt_required()
+def get_todo_view(id):
+  todo = Todo.query.get(id)
+
+  # must check if todo belongs to the authenticated user
+  if not todo or todo.user.username != get_jwt_identity():
+    return jsonify(error="Bad ID or unauthorized"), 401
+
+  return jsonify(todo.get_json()), 200
+
 
 # Task 5.4 Here PUT /todos/id
+@app.route('/todos/<int:id>', methods=['PUT'])
+@login_required(RegularUser)
+def edit_todo_view(id):
+  data = request.json
+  user = RegularUser.query.filter_by(username=get_jwt_identity()).first()
+
+  todo = Todo.query.get(id)
+
+  # must check if todo belongs to the authenticated user
+  if not todo or todo.user.username != get_jwt_identity():
+    return jsonify(error="Bad ID or unauthorized"), 401
+
+  user.update_todo(id, data['text'])
+  return jsonify(message=f"todo updated to '{data['text']}'!"), 200
+
 
 # Task 5.5 Here DELETE /todos/id
 
